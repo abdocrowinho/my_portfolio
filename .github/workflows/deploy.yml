@@ -24,7 +24,7 @@ jobs:
           channel: stable
 
       - name: Build
-        run: flutter build web --release
+        run: flutter build web --release --base-href "/my_portfolio/"
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
