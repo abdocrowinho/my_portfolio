@@ -153,9 +153,9 @@ class _ProjectGrid extends StatelessWidget {
         // Responsive columns
         // --------------------------------------------------------------
         //
-        // Desktop  -> 3 columns
-        // Tablet   -> 2 columns
-        // Mobile   -> 1 column
+        // Desktop  -> 3 generous columns
+        // Tablet   -> 2 generous columns
+        // Mobile   -> 1 tall card, so project content is never clipped.
         //
         final width = constraints.maxWidth;
 
@@ -204,14 +204,14 @@ class _ProjectGrid extends StatelessWidget {
       int columns,
       ) {
     if (columns == 3) {
-      return 0.72;
+      return 0.50;
     }
 
     if (columns == 2) {
-      return 0.70;
+      return 0.48;
     }
 
-    return 0.72;
+    return 0.48;
   }
 }
 

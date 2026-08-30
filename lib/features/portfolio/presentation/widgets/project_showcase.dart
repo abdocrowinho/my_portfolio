@@ -36,7 +36,7 @@ class ProjectShowcase extends StatelessWidget {
           // ============================================================
 
           SizedBox(
-            height: isDesktop ? 280 : 250,
+            height: isDesktop ? 340 : 310,
             width: double.infinity,
             child: _ImageGallery(
               urls: project.imageUrls,
@@ -75,7 +75,7 @@ class ProjectShowcase extends StatelessWidget {
 
                   Text(
                     project.description,
-                    maxLines: 3,
+                    maxLines: 5,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context)
                         .textTheme
