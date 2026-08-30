@@ -37,6 +37,7 @@ class _PortfolioPageState extends State<PortfolioPage> {
     1: MascotSection.about,
     2: MascotSection.skills,
     3: MascotSection.projects,
+    5: MascotSection.contact,
   };
 
   @override

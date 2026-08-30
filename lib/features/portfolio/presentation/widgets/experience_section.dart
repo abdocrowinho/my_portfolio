@@ -22,9 +22,11 @@ class ExperienceSection extends StatelessWidget {
         distance: 40,
         children: const [
           _ExperienceItem(
-            role: 'Freelance Android Developer',
-            company: 'Self-employed',
-            period: 'January 2024 — Present',
+            role: 'DoDeal — Desktop CRM',
+            company: 'Freelance · CMP, Kotlin, Ktor, MVI',
+            period: '2026',
+            description:
+                'Native CRM for Windows and macOS from one Kotlin codebase, using Clean Architecture and MVI.',
           ),
           _ExperienceItem(
             role: 'Android Developer Trainee',
@@ -43,10 +45,12 @@ class _ExperienceItem extends StatelessWidget {
     required this.role,
     required this.company,
     required this.period,
+    this.description,
   });
   final String role;
   final String company;
   final String period;
+  final String? description;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -63,6 +67,10 @@ class _ExperienceItem extends StatelessWidget {
         Text(role, style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 7),
         Text('$company  ·  $period'),
+        if (description case final value?) ...[
+          const SizedBox(height: 10),
+          Text(value, style: Theme.of(context).textTheme.bodyMedium),
+        ],
       ],
     ),
   );

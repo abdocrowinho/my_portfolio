@@ -133,13 +133,12 @@ class SkillsSection extends StatelessWidget {
                 crossAxisSpacing: 24,
                 mainAxisSpacing: 24,
 
-                // أهم حاجة هنا:
-                // نخلي الكارت أطول شوية عشان الـ chips الكتير.
+                // Each card stays tall enough for all chips on narrow screens.
                 childAspectRatio: columns == 3
-                    ? 1.48
+                    ? 1.15
                     : columns == 2
-                    ? 1.55
-                    : 2.25,
+                    ? 1.20
+                    : 1.15,
               ),
 
               itemBuilder: (context, index) {
@@ -289,6 +288,8 @@ class _SkillCardState extends State<_SkillCard> {
 
   @override
   Widget build(BuildContext context) {
+    final isNarrow = MediaQuery.sizeOf(context).width < 480;
+
     return MouseRegion(
       onEnter: (_) {
         setState(() {
@@ -306,7 +307,7 @@ class _SkillCardState extends State<_SkillCard> {
         ),
         curve: Curves.easeOut,
 
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.all(isNarrow ? 18 : 24),
 
         decoration: BoxDecoration(
           color: _hovered

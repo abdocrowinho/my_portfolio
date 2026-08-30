@@ -7,7 +7,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-enum MascotSection { none, hero, about, skills, projects }
+enum MascotSection { none, hero, about, skills, projects, contact }
 
 class PlayfulMascot extends StatefulWidget {
   const PlayfulMascot({
@@ -78,6 +78,7 @@ class _PlayfulMascotState extends State<PlayfulMascot>
   Size _bounds = Size.zero;
   bool _ready = false;
   bool _blinking = false;
+  Offset? _pointerPosition;
 
   Offset _eyeFrom = Offset.zero;
   Offset _eyeTo = Offset.zero;
@@ -105,13 +106,17 @@ class _PlayfulMascotState extends State<PlayfulMascot>
     ),
     MascotSection.skills: _SectionScript(
       target: Offset(0.62, 0.42),
-      message: "I told you he's a genius.",
+      message: 'There is still more he has not told you about.',
       wink: true,
     ),
     MascotSection.projects: _SectionScript(
       target: Offset(0.80, 0.60),
       message: 'My friend did amazing work here!',
       facingAway: true,
+    ),
+    MascotSection.contact: _SectionScript(
+      target: Offset(0.78, 0.56),
+      message: "Let's talk!",
     ),
   };
   static const _idleTarget = Offset(0.88, 0.80);
@@ -232,10 +237,35 @@ class _PlayfulMascotState extends State<PlayfulMascot>
       _lerp(_hopFrom, _hopTo, Curves.easeOutCubic.transform(_hopController.value));
 
   void _lookTo(Offset target, {Duration? duration}) {
+    if (_pointerPosition case final pointer? when !_facingAway) {
+      _setPointerGaze(pointer);
+      return;
+    }
     _eyeFrom = _eyeOffset;
     _eyeTo = target;
     if (duration != null) _eyeController.duration = duration;
     _eyeController.forward(from: 0);
+  }
+
+  void _followPointer(Offset pointer) {
+    _pointerPosition = pointer;
+    if (!_facingAway) _setPointerGaze(pointer);
+  }
+
+  void _setPointerGaze(Offset pointer) {
+    final mascotCenter =
+        _position + Offset(widget.size * .75, widget.size * .75);
+    final delta = pointer - mascotCenter;
+    if (delta.distanceSquared < 4) return;
+    final gaze = Offset(
+      (delta.dx / 38).clamp(-1.4, 1.4),
+      (delta.dy / 38).clamp(-1.4, 1.4),
+    );
+    _eyeFrom = _eyeOffset;
+    _eyeTo = gaze;
+    _eyeController
+      ..duration = const Duration(milliseconds: 90)
+      ..forward(from: 0);
   }
 
   void _mouthTarget(double value, {Duration? duration}) {
@@ -578,14 +608,21 @@ class _PlayfulMascotState extends State<PlayfulMascot>
             .addPostFrameCallback((_) => _playSection(widget.section));
       }
 
-      const bubbleWidth = 190.0;
-      final bubbleLeft = (_position.dx - bubbleWidth / 2 + widget.size / 2)
+      const bubbleWidth = 170.0;
+      final roomOnRight = _bounds.width - (_position.dx + widget.size);
+      final bubbleLeft = (roomOnRight >= bubbleWidth + 16
+              ? _position.dx + widget.size + 8
+              : _position.dx - bubbleWidth - 8)
           .clamp(8.0, max(_bounds.width - bubbleWidth - 8, 8.0));
-      final bubbleTop = max(_position.dy - 78, widget.topSafeArea - 60);
+      final bubbleTop = (_position.dy - 8)
+          .clamp(widget.topSafeArea - 20, max(_bounds.height - 70, 0.0));
       final hopOffsetY = -_hop * widget.size * 0.5;
 
-      return Stack(
-        children: [
+      return Listener(
+        behavior: HitTestBehavior.translucent,
+        onPointerHover: (event) => _followPointer(event.localPosition),
+        child: Stack(
+          children: [
           Positioned(
             left: _position.dx,
             top: _position.dy + hopOffsetY,
@@ -628,7 +665,7 @@ class _PlayfulMascotState extends State<PlayfulMascot>
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeOutBack,
               left: bubbleLeft.toDouble(),
-              top: bubbleTop,
+              top: bubbleTop.toDouble(),
               child: AnimatedOpacity(
                 opacity: _bubbleVisible ? 1 : 0,
                 duration: const Duration(milliseconds: 280),
@@ -636,7 +673,8 @@ class _PlayfulMascotState extends State<PlayfulMascot>
                 child: _SpeechBubble(text: _speech!, width: bubbleWidth),
               ),
             ),
-        ],
+          ],
+        ),
       );
     },
   );
@@ -919,30 +957,20 @@ class _MorphPainter extends CustomPainter {
     if (mouthOpenness <= closedThreshold) {
       final t = (mouthOpenness / closedThreshold).clamp(0.0, 1.0);
       final halfW = baseRadius * (0.16 + t * 0.06);
-      final peakLift = baseRadius * (0.05 + t * 0.04);
-      final dip = baseRadius * 0.03 * (1 - t);
-
-      final left = mouthCenter + Offset(-halfW, dip);
-      final peak = mouthCenter + Offset(0, -peakLift);
-      final right = mouthCenter + Offset(halfW, dip);
-
-      final chevron = Path()
+      final smileDepth = baseRadius * (0.10 + t * 0.04);
+      final left = mouthCenter + Offset(-halfW, -baseRadius * .02);
+      final right = mouthCenter + Offset(halfW, -baseRadius * .02);
+      final smile = Path()
         ..moveTo(left.dx, left.dy)
         ..quadraticBezierTo(
-          mouthCenter.dx - halfW * 0.3,
-          peak.dy + baseRadius * 0.01,
-          peak.dx,
-          peak.dy,
-        )
-        ..quadraticBezierTo(
-          mouthCenter.dx + halfW * 0.3,
-          peak.dy + baseRadius * 0.01,
+          mouthCenter.dx,
+          mouthCenter.dy + smileDepth,
           right.dx,
           right.dy,
         );
 
       canvas.drawPath(
-        chevron,
+        smile,
         Paint()
           ..color = Colors.black87
           ..style = PaintingStyle.stroke
