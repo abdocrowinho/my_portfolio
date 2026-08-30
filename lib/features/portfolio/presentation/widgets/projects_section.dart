@@ -186,9 +186,7 @@ class _ProjectGrid extends StatelessWidget {
               crossAxisSpacing: 20,
               mainAxisSpacing: 20,
               childAspectRatio: _getAspectRatio(
-                width,
                 columns,
-                projects,
               ),
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -200,28 +198,16 @@ class _ProjectGrid extends StatelessWidget {
     );
   }
 
-  double _getAspectRatio(
-      double width,
-      int columns,
-      List<PortfolioProject> projects,
-      ) {
-    final maxTagCount = projects.fold<int>(
-      0,
-      (count, project) => project.tags.length > count
-          ? project.tags.length
-          : count,
-    );
-    final hasManyTags = maxTagCount > 4;
-
+  double _getAspectRatio(int columns) {
     if (columns == 3) {
-      return hasManyTags ? 0.40 : 0.46;
+      return 0.54;
     }
 
     if (columns == 2) {
-      return hasManyTags ? 0.38 : 0.43;
+      return 0.52;
     }
 
-    return hasManyTags ? 0.36 : 0.42;
+    return 0.48;
   }
 }
 

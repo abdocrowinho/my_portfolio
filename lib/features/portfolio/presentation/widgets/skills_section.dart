@@ -121,21 +121,19 @@ class SkillsSection extends StatelessWidget {
               columns = 1;
             }
 
-            const gap = 20.0;
-            final cardWidth = (width - gap * (columns - 1)) / columns;
-
-            return Wrap(
-              spacing: gap,
-              runSpacing: gap,
-              children: List.generate(
-                _categories.length,
-                (index) => SizedBox(
-                  width: cardWidth,
-                  child: _AnimatedSkillCard(
-                    category: _categories[index],
-                    delay: Duration(milliseconds: 100 * index),
-                  ),
-                ),
+            return GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _categories.length,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: columns,
+                crossAxisSpacing: 20,
+                mainAxisSpacing: 20,
+                mainAxisExtent: 260,
+              ),
+              itemBuilder: (context, index) => _AnimatedSkillCard(
+                category: _categories[index],
+                delay: Duration(milliseconds: 100 * index),
               ),
             );
           },
@@ -378,19 +376,24 @@ class _SkillCardState extends State<_SkillCard> {
             // TAGS
             // ==========================================================
 
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: widget.category.skills
-                  .asMap()
-                  .entries
-                  .map(
-                    (entry) => _AnimatedChip(
-                      label: entry.value,
-                      index: entry.key,
-                    ),
-                  )
-                  .toList(),
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const NeverScrollableScrollPhysics(),
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: widget.category.skills
+                      .asMap()
+                      .entries
+                      .map(
+                        (entry) => _AnimatedChip(
+                          label: entry.value,
+                          index: entry.key,
+                        ),
+                      )
+                      .toList(),
+                ),
+              ),
             ),
           ],
         ),
