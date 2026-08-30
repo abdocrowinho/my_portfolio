@@ -95,8 +95,6 @@ class ProjectShowcase extends StatelessWidget {
                     children: project.tags.map(_Tag.new).toList(),
                   ),
 
-                  const Spacer(),
-
                   const SizedBox(height: 20),
 
                   // ======================================================
