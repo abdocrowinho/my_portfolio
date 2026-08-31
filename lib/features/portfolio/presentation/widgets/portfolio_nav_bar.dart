@@ -13,16 +13,24 @@ class PortfolioNavBar extends StatelessWidget {
     padding: const EdgeInsets.symmetric(vertical: 20),
     child: Row(
       children: [
-        const Text(
-          'AO.',
-          style: TextStyle(
-            color: AppColors.accent,
-            fontSize: 24,
-            fontWeight: FontWeight.w800,
+        InkWell(
+          onTap: () => onNavigate(0),
+          borderRadius: BorderRadius.circular(8),
+          child: const Padding(
+            padding: EdgeInsets.all(4),
+            child: Text(
+              'AO.',
+              style: TextStyle(
+                color: AppColors.accent,
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
           ),
         ),
         const Spacer(),
         if (context.isDesktop) ...[
+          _NavLink(label: 'Home', index: 0, onNavigate: onNavigate),
           _NavLink(label: 'About', index: 1, onNavigate: onNavigate),
           _NavLink(label: 'Stack', index: 2, onNavigate: onNavigate),
           _NavLink(label: 'Work', index: 3, onNavigate: onNavigate),

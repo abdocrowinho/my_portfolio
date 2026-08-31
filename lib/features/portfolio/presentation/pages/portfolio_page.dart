@@ -75,13 +75,21 @@ class _PortfolioPageState extends State<PortfolioPage> {
   }
 
   void _scrollTo(int index) {
+    if (index == 0) {
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 650),
+        curve: Curves.easeInOutCubic,
+      );
+      return;
+    }
     final sectionContext = _sectionKeys[index].currentContext;
     if (sectionContext != null) {
       Scrollable.ensureVisible(
         sectionContext,
         duration: const Duration(milliseconds: 650),
         curve: Curves.easeInOutCubic,
-        alignment: .06,
+        alignment: .5,
       );
     }
   }
