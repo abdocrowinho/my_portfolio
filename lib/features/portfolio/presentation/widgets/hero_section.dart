@@ -1,11 +1,11 @@
 // lib/features/portfolio/presentation/widgets/hero_section.dart
 import 'package:abdelrhman_protfolio/core/responsive/responsive_layout.dart';
 import 'package:abdelrhman_protfolio/core/theme/app_colors.dart';
+import 'package:abdelrhman_protfolio/core/utils/cv_downloader.dart';
 import 'package:abdelrhman_protfolio/features/portfolio/presentation/content/portfolio_content.dart';
 import 'package:abdelrhman_protfolio/features/portfolio/presentation/widgets/animated_portrait.dart';
 import 'package:abdelrhman_protfolio/core/widgets/terminal_typewriter.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import 'animation_helper/stagger_Effect.dart';
 
@@ -65,10 +65,7 @@ class HeroSection extends StatelessWidget {
               child: const Text('Start a conversation'),
             ),
             OutlinedButton.icon(
-              onPressed: () => launchUrl(
-                Uri.base.resolve('assets/documents/Abdelrahman_Osama_CV.pdf'),
-                mode: LaunchMode.externalApplication,
-              ),
+              onPressed: downloadCv,
               icon: const Icon(Icons.download_rounded),
               label: const Text('Download CV'),
             ),
@@ -131,6 +128,7 @@ class HeroSection extends StatelessWidget {
       ),
     );
   }
+
 }
 
 class _AvailabilityBadge extends StatelessWidget {
