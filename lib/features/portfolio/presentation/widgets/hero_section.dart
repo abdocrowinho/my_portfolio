@@ -34,7 +34,7 @@ class HeroSection extends StatelessWidget {
       children: [
         const _AvailabilityBadge(),
         Text('Abdelrhman\nOsama.', style: titleStyle),
-        const Text('Android Developer · Kotlin · Jetpack Compose'),
+        const Text('Android Developer · Kotlin · Jetpack Compose · Flutter'),
         ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 650),
           child: TerminalTypewriter(
@@ -79,6 +79,10 @@ class HeroSection extends StatelessWidget {
             _FocusLabel('Compose'),
             _FocusLabel('MVI'),
             _FocusLabel('Real-time systems'),
+            _FocusLabel('Flutter'),
+            _FocusLabel('Clean Architecture'),
+
+
           ],
         ),
       ],
