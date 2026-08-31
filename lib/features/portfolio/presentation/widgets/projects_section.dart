@@ -181,33 +181,19 @@ class _ProjectGrid extends StatelessWidget {
           )
               .toList(),
           builder: (context, animated) {
-            return GridView.count(
-              crossAxisCount: columns,
-              crossAxisSpacing: 20,
-              mainAxisSpacing: 20,
-              childAspectRatio: _getAspectRatio(
-                columns,
-              ),
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              children: animated,
+            const gap = 20.0;
+            final cardWidth = (width - gap * (columns - 1)) / columns;
+            return Wrap(
+              spacing: gap,
+              runSpacing: gap,
+              children: animated
+                  .map((child) => SizedBox(width: cardWidth, child: child))
+                  .toList(),
             );
           },
         );
       },
     );
-  }
-
-  double _getAspectRatio(int columns) {
-    if (columns == 3) {
-      return 0.54;
-    }
-
-    if (columns == 2) {
-      return 0.52;
-    }
-
-    return 0.48;
   }
 }
 

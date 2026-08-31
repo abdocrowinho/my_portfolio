@@ -17,6 +17,8 @@ class ProjectShowcase extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDesktop = context.isDesktop;
+    final visibleTags = project.tags.take(5).toList();
+    final hiddenTagCount = project.tags.length - visibleTags.length;
 
     return Container(
       width: double.infinity,
@@ -47,17 +49,11 @@ class ProjectShowcase extends StatelessWidget {
           // CONTENT
           // ============================================================
 
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(
-                24,
-                22,
-                24,
-                22,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 22, 24, 22),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                   Text(
                     project.name,
                     maxLines: 1,
@@ -73,59 +69,104 @@ class ProjectShowcase extends StatelessWidget {
 
                   const SizedBox(height: 12),
 
-                  Text(
-                    project.description,
-                    maxLines: 5,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium
-                        ?.copyWith(
-                      color: Colors.white.withValues(alpha: .68),
-                      height: 1.55,
-                    ),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final style = Theme.of(context).textTheme.bodyMedium
+                          ?.copyWith(
+                            color: Colors.white.withValues(alpha: .68),
+                            height: 1.55,
+                          );
+                      final isOverflowing = _isDescriptionOverflowing(
+                        context,
+                        style,
+                        constraints.maxWidth,
+                      );
+                      final text = isOverflowing
+                          ? _trimDescriptionForSeeMore(
+                              context,
+                              style,
+                              constraints.maxWidth,
+                            )
+                          : project.description;
+                      return SizedBox(
+                        height: _threeLineHeight(context, style),
+                        child: MouseRegion(
+                          cursor: isOverflowing
+                              ? SystemMouseCursors.click
+                              : MouseCursor.defer,
+                          child: GestureDetector(
+                            onTap: isOverflowing
+                                ? () => _showFullDescription(context)
+                                : null,
+                            child: Text.rich(
+                              TextSpan(
+                                style: style,
+                                children: [
+                                  TextSpan(text: text),
+                                  if (isOverflowing)
+                                    TextSpan(
+                                      text: '… See more',
+                                      style: style?.copyWith(
+                                        color: AppColors.accent,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              maxLines: 3,
+                              overflow: TextOverflow.clip,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   ),
 
                   const SizedBox(height: 18),
 
-                  if (project.tags.isNotEmpty)
-                    Wrap(
+                if (visibleTags.isNotEmpty)
+                  Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: project.tags.map(_Tag.new).toList(),
+                    children: visibleTags.map(_Tag.new).toList(),
                   ),
 
-                  const SizedBox(height: 20),
+                if (hiddenTagCount > 0)
+                  TextButton(
+                    onPressed: () => _showAllTags(context),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.accent,
+                      padding: const EdgeInsets.only(top: 6, bottom: 2),
+                    ),
+                    child: Text('See more ($hiddenTagCount)'),
+                  ),
+
+                if (project.tags.isNotEmpty) const SizedBox(height: 10),
 
                   // ======================================================
                   // GITHUB
                   // ======================================================
 
-                  if (project.repoUrl != null &&
-                      project.repoUrl!.trim().isNotEmpty)
-                    OutlinedButton.icon(
-                      onPressed: () => _openRepo(project.repoUrl!),
-                      icon: const Icon(
-                        Icons.code_rounded,
-                        size: 19,
+                if (project.repoUrl != null && project.repoUrl!.trim().isNotEmpty) ...[
+                  OutlinedButton.icon(
+                    onPressed: () => _openRepo(project.repoUrl!),
+                    icon: const Icon(Icons.code_rounded, size: 19),
+                    label: const Text('GitHub'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      side: BorderSide(color: AppColors.border),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 13,
                       ),
-                      label: const Text('GitHub'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        side: BorderSide(
-                          color: AppColors.border,
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 18,
-                          vertical: 13,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(11),
-                        ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(11),
                       ),
                     ),
+                  ),
+                  const SizedBox(height: 10),
                 ],
-              ),
+              ],
             ),
           ),
         ],
@@ -141,6 +182,93 @@ class ProjectShowcase extends StatelessWidget {
     await launchUrl(
       uri,
       webOnlyWindowName: '_blank',
+    );
+  }
+
+  void _showAllTags(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: Text('${project.name} tags'),
+        content: SingleChildScrollView(
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: project.tags.map(_Tag.new).toList(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  bool _isDescriptionOverflowing(
+    BuildContext context,
+    TextStyle? style,
+    double maxWidth,
+  ) {
+    final painter = TextPainter(
+      text: TextSpan(text: project.description, style: style),
+      maxLines: 3,
+      textDirection: Directionality.of(context),
+    )..layout(maxWidth: maxWidth);
+    return painter.didExceedMaxLines;
+  }
+
+  String _trimDescriptionForSeeMore(
+    BuildContext context,
+    TextStyle? style,
+    double maxWidth,
+  ) {
+    const suffix = '… See more';
+    var low = 0;
+    var high = project.description.length;
+
+    while (low < high) {
+      final middle = (low + high + 1) ~/ 2;
+      final candidate = '${project.description.substring(0, middle).trimRight()}$suffix';
+      final painter = TextPainter(
+        text: TextSpan(text: candidate, style: style),
+        maxLines: 3,
+        textDirection: Directionality.of(context),
+      )..layout(maxWidth: maxWidth);
+      if (painter.didExceedMaxLines) {
+        high = middle - 1;
+      } else {
+        low = middle;
+      }
+    }
+    return project.description.substring(0, low).trimRight();
+  }
+
+  double _threeLineHeight(BuildContext context, TextStyle? style) {
+    final painter = TextPainter(
+      text: TextSpan(text: 'A', style: style),
+      textDirection: Directionality.of(context),
+    )..layout();
+    return painter.preferredLineHeight * 3;
+  }
+
+  void _showFullDescription(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: Text(project.name),
+        content: SingleChildScrollView(child: Text(project.description)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
     );
   }
 }
